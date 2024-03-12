@@ -14,7 +14,7 @@ typedef struct Program
     int err;
 } Program;
 
-char* createKernel();
+char* createKernel(char kern_name[20]);
 
 void buildProgram(struct Program* prog, char* kernel_code);
 

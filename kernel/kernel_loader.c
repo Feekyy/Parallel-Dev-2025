@@ -5,10 +5,10 @@
 
 #include <CL/cl.h>
 
-char* createKernel()
+char* createKernel(char kern_name[20])
 {
 
-    FILE *file = fopen("kern.cl", "r");
+    FILE *file = fopen(kern_name, "r");
 
     fseek(file, 0, SEEK_END);
     size_t file_size = ftell(file);
@@ -49,6 +49,6 @@ void buildProgram(Program* prog, char* kernel_code)
     prog->err = clBuildProgram(prog->program, 0, NULL, NULL, NULL, NULL);
     if (prog->err != CL_SUCCESS) 
     {
-        printf("Build error! Code: %d\n", prog->err);
+        printf("Build error! Code: %d. Error msg: %s\n", prog->err, printError(prog->err));
     }
 }

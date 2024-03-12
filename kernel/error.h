@@ -1,6 +1,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-void printError(int error);
+const char* printError(int error);
 
 #endif

@@ -6,56 +6,25 @@
 
 #include <CL/cl.h>
 
-/*
-    "   if (get_global_id(0) < n) {\n"
-    "       buffer[get_global_id(0)] = 11;\n"
-    "   }\n"
-*/
-
-/*
-    "   if (get_global_id(0) < n) {\n"
-    "       buffer[get_global_id(0)] = get_global_id(0) * 10;\n"
-    "   }\n"
-*/
-
-/*
-    "   if (get_global_id(0) % 2 == 0) {\n"
-    "       buffer[get_global_id(0)] = 11;\n"
-    "   } else {\n"
-    "       buffer[get_global_id(0)] = 22;\n"
-    "   }\n"
-*/
-
-const int SAMPLE_SIZE = 1000;
-
 int main(void)
 {
-    int i;
+    int i, a, b;
     
     Program prog;
 
-    buildProgram(&prog, createKernel("kern.cl"));
+    buildProgram(&prog, createKernel("matrix_kernel.cl"));
 
     cl_kernel kernel = clCreateKernel(prog.program, "hello_kernel", NULL);
 
-    // Create the host buffer and initialize it
-    int* host_buffer = (int*)malloc(SAMPLE_SIZE * sizeof(int));
-    for (i = 0; i < SAMPLE_SIZE; ++i) 
-    {
-        host_buffer[i] = i;
-    }
+    int* host_buffer = (int*)malloc(sizeof(int)*3);
 
-    // Create the device buffer
-    cl_mem device_buffer = clCreateBuffer(prog.context, CL_MEM_READ_WRITE, SAMPLE_SIZE * sizeof(int), NULL, NULL);
+    cl_mem device_buffer = clCreateBuffer(prog.context, CL_MEM_READ_WRITE, sizeof(int)*3, NULL, NULL);
 
-    // Set kernel arguments
     clSetKernelArg(kernel, 0, sizeof(cl_mem), (void*)&device_buffer);
     clSetKernelArg(kernel, 1, sizeof(int), (void*)&SAMPLE_SIZE);
 
-    // Create the command queue
     cl_command_queue command_queue = clCreateCommandQueue(prog.context, prog.did, NULL, NULL);
 
-    // Host buffer -> Device buffer
     clEnqueueWriteBuffer
     (
         command_queue,
@@ -69,12 +38,10 @@ int main(void)
         NULL
     );
 
-    // Size specification
     size_t local_work_size = 256;
     size_t n_work_groups = (SAMPLE_SIZE + local_work_size + 1) / local_work_size;
     size_t global_work_size = n_work_groups * local_work_size;
 
-    // Apply the kernel on the range
     clEnqueueNDRangeKernel(
         command_queue,
         kernel,
@@ -87,7 +54,6 @@ int main(void)
         NULL
     );
 
-    // Host buffer <- Device buffer
     clEnqueueReadBuffer(
         command_queue,
         device_buffer,
@@ -100,11 +66,11 @@ int main(void)
         NULL
     );
 
-    for (i = 0; i < SAMPLE_SIZE; ++i) {
+    for (i = 0; i < SAMPLE_SIZE; ++i) 
+    {
         printf("[%d] = %d, ", i, host_buffer[i]);
     }
 
-    // Release the resources
     clReleaseKernel(kernel);
     clReleaseProgram(prog.program);
     clReleaseContext(prog.context);
