@@ -2,29 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <kernel_loader.h>
+#include "kernel_loader.h"
+#include "image_import.h"
 
 #include <CL/cl.h>
-
-/*
-    "   if (get_global_id(0) < n) {\n"
-    "       buffer[get_global_id(0)] = 11;\n"
-    "   }\n"
-*/
-
-/*
-    "   if (get_global_id(0) < n) {\n"
-    "       buffer[get_global_id(0)] = get_global_id(0) * 10;\n"
-    "   }\n"
-*/
-
-/*
-    "   if (get_global_id(0) % 2 == 0) {\n"
-    "       buffer[get_global_id(0)] = 11;\n"
-    "   } else {\n"
-    "       buffer[get_global_id(0)] = 22;\n"
-    "   }\n"
-*/
 
 const int SAMPLE_SIZE = 1000;
 
@@ -32,9 +13,13 @@ int main(void)
 {
     int i;
     
+    Image ima;
     Program prog;
 
+    import(&ima, "horse.png");
     buildProgram(&prog, createKernel("image.cl"));
+
+    printf("%d\n", ima.height);
 
     cl_kernel kernel = clCreateKernel(prog.program, "hello_kernel", NULL);
 
