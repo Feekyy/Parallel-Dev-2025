@@ -1,6 +1,6 @@
 all:
 	cls
 	del main.exe
-	gcc -Wall main.c image_import.c ../kernel/kernel_loader.c ../kernel/error.c -o main.exe -lOpencl -I../kernel
+	gcc main.c image_import.c countor.c -o main.exe
 clean:
 	del main.exe
