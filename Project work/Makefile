@@ -1,7 +1,7 @@
 all:
 	del main.exe
 	cls
-	gcc main.c image_import.c countor.c -o main.exe
+	gcc -Iinclude/ src/main.c src/generate.c src/sorting.c src/opencl.c -o main.exe -lOpenCL
 	main.exe
 clean:
 	del main.exe
@@ -9,5 +9,5 @@ clean:
 debug:
 	del main.exe
 	cls
-	gcc main.c image_import.c countor.c -o main.exe -g
+	gcc -Iinclude/ src/main.c src/generate.c src/sorting.c src/opencl.c -o main.exe -lOpenCL -g
 	gdb main.exe
