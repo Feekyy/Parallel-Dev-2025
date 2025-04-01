@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define GROUP 1000
 #define SIZE 100000
-#define MAX 1000
+#define MAX 32000
 
 
 
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Max Sort (CPU) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "maxsort.txt");
+    writeArrayToFile(myArray, SIZE, "maxsort.txt");*/
 
     // Max Sort (OpenCL)
     myArray = generateRandomArray(SIZE, 0, MAX);
@@ -43,14 +44,14 @@ int main(int argc, char *argv[])
     }
     writeArrayToFile(myArray, SIZE, "maxdef_cl.txt");
     start = clock();
-    cl_max_sort(myArray, SIZE);
+    cl_max_sort(myArray, SIZE, GROUP);
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Max Sort (OpenCL) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "maxsort_cl.txt");*/
+    writeArrayToFile(myArray, SIZE, "maxsort_cl.txt");
 
     // Quick Sort (CPU)
-    myArray = generateRandomArray(SIZE, 0, MAX);
+    /*myArray = generateRandomArray(SIZE, 0, MAX);
     if (myArray == NULL) 
     {
         printf("Memory allocation failed in generateRandomArray\n");
@@ -62,10 +63,10 @@ int main(int argc, char *argv[])
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Quick Sort (CPU) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "quicksort.txt");
+    writeArrayToFile(myArray, SIZE, "quicksort.txt");*/
 
     // Quick Sort (OpenCL)
-    myArray = generateRandomArray(SIZE, 0, MAX);
+    /*myArray = generateRandomArray(SIZE, 0, MAX);
     if (myArray == NULL) 
     {
         printf("Memory allocation failed in generateRandomArray\n");
@@ -73,14 +74,14 @@ int main(int argc, char *argv[])
     }
     writeArrayToFile(myArray, SIZE, "quickdef_cl.txt");
     start = clock();
-    cl_quick_sort(myArray, 0, SIZE - 1, SIZE);
+    cl_quick_sort(myArray, SIZE);
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Quick Sort (OpenCL) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "quicksort_cl.txt");
+    writeArrayToFile(myArray, SIZE, "quicksort_cl.txt");*/
 
     // Radix Sort (CPU)
-    myArray = generateRandomArray(SIZE, 0, MAX);
+    /*myArray = generateRandomArray(SIZE, 0, MAX);
     if (myArray == NULL) 
     {
         printf("Memory allocation failed in generateRandomArray\n");
@@ -88,14 +89,14 @@ int main(int argc, char *argv[])
     }
     writeArrayToFile(myArray, SIZE, "radixdef.txt");
     start = clock();
-    radix_sort(myArray, SIZE, MAX);
+    radix_sort_quick(myArray, SIZE, MAX);
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Radix Sort (CPU) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "radixsort.txt");
+    writeArrayToFile(myArray, SIZE, "radixsort.txt");*/
 
     // Radix Sort (OpenCL)
-    myArray = generateRandomArray(SIZE, 0, MAX);
+    /*myArray = generateRandomArray(SIZE, 0, MAX);
     if (myArray == NULL) 
     {
         printf("Memory allocation failed in generateRandomArray\n");
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
     printf("Radix Sort (OpenCL) time: %.6f seconds\n", cpu_time_used);
-    writeArrayToFile(myArray, SIZE, "radixsort_cl.txt");
+    writeArrayToFile(myArray, SIZE, "radixsort_cl.txt");*/
 
     free(myArray);
 

@@ -53,32 +53,49 @@ void max_sort(unsigned long* arr, int size)
     }
 }
 
-void radix_sort(unsigned long* arr, int size, unsigned long max)
+void quick_sort_by_digit(unsigned long* arr, int low, int high, unsigned long exp) 
 {
-    unsigned long* output = (unsigned long*)malloc(size * sizeof(unsigned long));
-    if (output == NULL) 
+    if (low < high) 
     {
-        printf("Memory allocation failed in radix_sort\n");
-        return;
-    }
-
-    for (unsigned long exp = 1; max / exp > 0; exp *= 10)
-    {
-        int count[10] = {0};
-
-        for (int i = 0; i < size; i++) count[(arr[i] / exp) % 10]++;
-
-        for (int i = 8; i >= 0; i--) count[i] += count[i + 1];
-
-        for (int i = size - 1; i >= 0; i--)
+        int homogeneous = 1;
+        unsigned long d0 = (arr[low] / exp) % 10;
+        for (int k = low + 1; k <= high; k++) 
         {
-            int digit = (arr[i] / exp) % 10;
-            output[count[digit] - 1] = arr[i];
-            count[digit]--;
+            if ((arr[k] / exp) % 10 != d0) 
+            {
+                homogeneous = 0;
+                break;
+            }
         }
+        if (homogeneous)
+            return;
 
-        for (int i = 0; i < size; i++) arr[i] = output[i];
+        int pi = partition_by_digit(arr, low, high, exp);
+        quick_sort_by_digit(arr, low, pi - 1, exp);
+        quick_sort_by_digit(arr, pi + 1, high, exp);
     }
+}
 
-    free(output);
+
+int partition_by_digit(unsigned long* arr, int low, int high, unsigned long exp) 
+{
+    unsigned long pivot_digit = (arr[high] / exp) % 10;
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) {
+        unsigned long current_digit = (arr[j] / exp) % 10;
+        if (current_digit < pivot_digit) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
+    }
+    swap(&arr[i + 1], &arr[high]);
+    return (i + 1);
+}
+
+void radix_sort_quick(unsigned long* arr, int size, unsigned long max) 
+{
+    for (unsigned long exp = 1; max / exp > 0; exp *= 10) 
+    {
+        quick_sort_by_digit(arr, 0, size - 1, exp);
+    }
 }

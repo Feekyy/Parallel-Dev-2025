@@ -1,18 +1,21 @@
-__kernel void max_sort_kernel(__global unsigned long* arr, unsigned int size, unsigned int start) 
+__kernel void max_step_kernel(__global unsigned long* input, __global unsigned long* partial_max, unsigned int group_size, unsigned int size) 
 {
-    int gid = get_global_id(0);
-    int i = start + gid;
-    
-    if (i < size - 1) 
+    int gid = get_global_id(0);  
+    int start = gid * group_size;
+
+    if (start < size) 
     {
-        for (int j = i + 1; j < size; j++) 
+        unsigned long max_val = input[start];
+        
+        for (int i = 1; i < group_size && (start + i) < size; i++) 
         {
-            if (arr[j] > arr[i]) 
+            if (input[start + i] > max_val) 
             {
-                unsigned long temp = arr[j];
-                arr[j] = arr[i];
-                arr[i] = temp;
+                max_val = input[start + i];
             }
         }
+
+        partial_max[gid] = max_val;  
     }
 }
+
