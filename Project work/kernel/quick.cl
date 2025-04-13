@@ -1,43 +1,33 @@
-__kernel void quicksort_iterative(__global unsigned long* data, int size) 
+__kernel void partition(__global unsigned long* arr, int low, int high, __global int* pivot_index, unsigned long pivot) 
 {
-    int stack[256];
-    int top = -1;
-
-    stack[++top] = 0;
-    stack[++top] = size - 1;
-
-    while (top >= 0) 
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) 
     {
-        int high = stack[top--];
-        int low = stack[top--];
-
-        unsigned long pivot = data[low + (high - low) / 2];
-
-        int i = low;
-        int j = high;
-
-        while (i <= j) {
-            while (data[i] < pivot) i++;
-            while (data[j] > pivot) j--;
-            if (i <= j) {
-                unsigned long temp = data[i];
-                data[i] = data[j];
-                data[j] = temp;
-                i++;
-                j--;
-            }
-        }
-
-        if (low < j) 
+        if (arr[j] <= pivot) 
         {
-            stack[++top] = low;
-            stack[++top] = j;
+            i++;
+            unsigned long temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
+    }
+    unsigned long temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    *pivot_index = i + 1;
+}
 
-        if (i < high) 
+__kernel void insertion_sort(__global unsigned long* arr, int low, int high) 
+{
+    for (int i = low + 1; i <= high; i++) 
+    {
+        unsigned long key = arr[i];
+        int j = i - 1;
+        while (j >= low && arr[j] > key) 
         {
-            stack[++top] = i;
-            stack[++top] = high;
+            arr[j + 1] = arr[j];
+            j--;
         }
+        arr[j + 1] = key;
     }
 }

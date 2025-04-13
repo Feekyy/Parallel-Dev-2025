@@ -11,3 +11,6 @@ debug:
 	cls
 	gcc -Iinclude/ src/main.c src/generate.c src/sorting.c src/opencl.c -o main.exe -lOpenCL -g
 	gdb main.exe
+run:
+	cls
+	main.exe

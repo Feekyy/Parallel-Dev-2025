@@ -76,14 +76,15 @@ void quick_sort_by_digit(unsigned long* arr, int low, int high, unsigned long ex
     }
 }
 
-
 int partition_by_digit(unsigned long* arr, int low, int high, unsigned long exp) 
 {
     unsigned long pivot_digit = (arr[high] / exp) % 10;
     int i = low - 1;
-    for (int j = low; j <= high - 1; j++) {
+    for (int j = low; j <= high - 1; j++) 
+    {
         unsigned long current_digit = (arr[j] / exp) % 10;
-        if (current_digit < pivot_digit) {
+        if (current_digit < pivot_digit) 
+        {
             i++;
             swap(&arr[i], &arr[j]);
         }
