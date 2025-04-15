@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-void swap(unsigned long* a, unsigned long* b)
+void swap(int* a, int* b)
 {
-    unsigned long temp = *a;
+    int temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void quick_sort(unsigned long* arr, int low, int high)
+void quick_sort(int* arr, int low, int high)
 {
     if (low < high)
     {
@@ -22,9 +22,9 @@ void quick_sort(unsigned long* arr, int low, int high)
     }
 }
 
-int partition(unsigned long* arr, int low, int high)
+int partition(int* arr, int low, int high)
 {
-    unsigned long pivot = arr[high];
+    int pivot = arr[high];
     int i = (low - 1);
 
     for (int j = low; j <= high - 1; j++)
@@ -39,7 +39,7 @@ int partition(unsigned long* arr, int low, int high)
     return (i + 1);
 }
 
-void max_sort(unsigned long* arr, int size)
+void max_sort(int* arr, int size)
 {
     for (int i = 0; i < size - 1; i++)
     {
@@ -53,12 +53,12 @@ void max_sort(unsigned long* arr, int size)
     }
 }
 
-void quick_sort_by_digit(unsigned long* arr, int low, int high, unsigned long exp) 
+void quick_sort_by_digit(int* arr, int low, int high, int exp) 
 {
     if (low < high) 
     {
         int homogeneous = 1;
-        unsigned long d0 = (arr[low] / exp) % 10;
+        int d0 = (arr[low] / exp) % 10;
         for (int k = low + 1; k <= high; k++) 
         {
             if ((arr[k] / exp) % 10 != d0) 
@@ -76,13 +76,13 @@ void quick_sort_by_digit(unsigned long* arr, int low, int high, unsigned long ex
     }
 }
 
-int partition_by_digit(unsigned long* arr, int low, int high, unsigned long exp) 
+int partition_by_digit(int* arr, int low, int high, int exp) 
 {
-    unsigned long pivot_digit = (arr[high] / exp) % 10;
+    int pivot_digit = (arr[high] / exp) % 10;
     int i = low - 1;
     for (int j = low; j <= high - 1; j++) 
     {
-        unsigned long current_digit = (arr[j] / exp) % 10;
+        int current_digit = (arr[j] / exp) % 10;
         if (current_digit < pivot_digit) 
         {
             i++;
@@ -93,9 +93,9 @@ int partition_by_digit(unsigned long* arr, int low, int high, unsigned long exp)
     return (i + 1);
 }
 
-void radix_sort_quick(unsigned long* arr, int size, unsigned long max) 
+void radix_sort_quick(int* arr, int size, int max) 
 {
-    for (unsigned long exp = 1; max / exp > 0; exp *= 10) 
+    for (int exp = 1; max / exp > 0; exp *= 10) 
     {
         quick_sort_by_digit(arr, 0, size - 1, exp);
     }

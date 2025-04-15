@@ -1,8 +1,8 @@
 #ifndef GENERATE_H
 #define GENERATE_H
 
-unsigned long* generateRandomArray(int size, unsigned long min, unsigned long max);
+int* generateRandomArray(int size, int min, int max);
 
-void writeArrayToFile(unsigned long* arr, int size, const char* filename);
+void writeArrayToFile(int* arr, int size, const char* filename);
 
 #endif

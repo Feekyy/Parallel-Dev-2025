@@ -1,26 +1,17 @@
-__kernel void max_step_kernel(__global ulong* input, __global ulong* partial_max, int group_size, int size) 
+__kernel void max_step_kernel(__global const int* input, __global int* partial_max, int group_size, int size)
 {
     int gid = get_global_id(0);
     int start = gid * group_size;
+    int end = min(start + group_size, size);
 
-    if (start < size)
+    int max_val = input[start];
+    for (int i = start + 1; i < end; i++)
     {
-        ulong max_val = input[start];
-
-        for (int i = 0; i < group_size && (start + i) < size; i++)
+        if (input[i] > max_val)
         {
-            ulong current = input[start + i];
-            printf("gid %lu: input[%lu] = %lu\n", gid, start + i, current);
-            
-            if (current > max_val)
-            {
-                max_val = current;
-            }
+            max_val = input[i];
         }
-        partial_max[gid] = max_val;
     }
-    else
-    {
-        partial_max[gid] = 0;
-    }
+
+    partial_max[gid] = max_val;
 }

@@ -25,13 +25,8 @@ char* readKernelSource(const char* filename)
     return source;
 }
 
-void cl_max_sort(unsigned long* arr, int size, int group) 
+void cl_max_sort(int* arr, int size, int group) 
 {
-    for (int i = 0; i < size; i++) 
-    {
-        printf("input[%d] = %lu\n", i, arr[i]);
-    }
-
     cl_platform_id platform;
     cl_device_id device;
     cl_context context;
@@ -40,10 +35,6 @@ void cl_max_sort(unsigned long* arr, int size, int group)
     cl_kernel kernel;
     cl_mem d_input, d_partial_max;
     cl_int err;
-
-    size_t globalSize = (size + group - 1) / group;
-
-    unsigned long* partial_max = (unsigned long*)malloc(sizeof(unsigned long) * globalSize);
 
     char* kernelSource = readKernelSource("kernel/max.cl");
 
@@ -59,54 +50,56 @@ void cl_max_sort(unsigned long* arr, int size, int group)
 
     kernel = clCreateKernel(program, "max_step_kernel", &err);
 
-    cl_ulong* input = arr;
-
-    d_input = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(cl_ulong) * size, input, &err);
-    d_partial_max = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(cl_ulong) * globalSize, NULL, &err);
-
-    err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_input);
-    err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_partial_max);
-    err = clSetKernelArg(kernel, 2, sizeof(int), &group);
-    err = clSetKernelArg(kernel, 3, sizeof(int), &size);
-
-    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, NULL, 0, NULL, NULL);
-    clFinish(queue);
-
-    err = clEnqueueReadBuffer(queue, d_partial_max, CL_TRUE, 0, sizeof(cl_ulong) * globalSize, partial_max, 0, NULL, NULL);
-
-    printf("Partial maximums:\n");
-    for (int i = 0; i < size / group; i++) 
+    for (int cursor = 0; cursor < size; cursor++)
     {
-        printf("%lu ", partial_max[i]);
-    }
-    printf("\n");
+        int remaining = size - cursor;
+        size_t globalSize = (remaining + group - 1) / group;
 
-    unsigned long final_max = partial_max[0];
-    for (int i = 1; i < size / group; i++) 
-    {
-        if (partial_max[i] > final_max) 
+        d_input = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int) * remaining, arr + cursor, &err);
+        d_partial_max = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(int) * globalSize, NULL, &err);
+        clFinish(queue);
+
+        err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_input);
+        err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_partial_max);
+        err = clSetKernelArg(kernel, 2, sizeof(int), &group);
+        err = clSetKernelArg(kernel, 3, sizeof(int), &remaining);
+
+        err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, NULL, 0, NULL, NULL);
+        clFinish(queue);
+
+        int* partial_max = malloc(sizeof(int) * globalSize);
+        clEnqueueReadBuffer(queue, d_partial_max, CL_TRUE, 0, sizeof(int) * globalSize, partial_max, 0, NULL, NULL);
+
+        int final_max = partial_max[0];
+        for (int i = 1; i < globalSize; i++) if (partial_max[i] > final_max) final_max = partial_max[i];
+
+        int max_index = cursor;
+        for (int i = cursor; i < size; i++)
         {
-            final_max = partial_max[i];
+            if (arr[i] == final_max)
+            {
+                max_index = i;
+                break;
+            }
         }
-    }
-    printf("Final max: %lu\n", final_max);
 
-    for (int i = 0; i < size; i++) 
-    {
-        arr[i] = final_max;
+        int temp = arr[cursor];
+        arr[cursor] = arr[max_index];
+        arr[max_index] = temp;
+
+        free(partial_max);
+        clReleaseMemObject(d_input);
+        clReleaseMemObject(d_partial_max);
     }
 
-    clReleaseMemObject(d_input);
-    clReleaseMemObject(d_partial_max);
     clReleaseKernel(kernel);
     clReleaseProgram(program);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
     free(kernelSource);
-    free(partial_max);
 }
 
-void cl_quick_sort(unsigned long* arr, int size) 
+void cl_quick_sort(int* arr, int size) 
 {
     cl_int err;
     cl_platform_id platform;
@@ -129,7 +122,7 @@ void cl_quick_sort(unsigned long* arr, int size)
     partition_kernel = clCreateKernel(program, "partition", &err);
     insertion_sort_kernel = clCreateKernel(program, "insertion_sort", &err);
 
-    cl_mem buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(unsigned long), arr, &err);
+    cl_mem buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(int), arr, &err);
     cl_mem pivot_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &err);
 
     int stack[2 * (sizeof(int) * 8)];
@@ -144,14 +137,14 @@ void cl_quick_sort(unsigned long* arr, int size)
 
         while (high - low > INSERTION_SORT_THRESHOLD) 
         {
-            unsigned long pivot;
-            err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, sizeof(unsigned long) * high, sizeof(unsigned long), &pivot, 0, NULL, NULL);
+            int pivot;
+            err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, sizeof(int) * high, sizeof(int), &pivot, 0, NULL, NULL);
 
             err = clSetKernelArg(partition_kernel, 0, sizeof(cl_mem), &buffer);
             err |= clSetKernelArg(partition_kernel, 1, sizeof(int), &low);
             err |= clSetKernelArg(partition_kernel, 2, sizeof(int), &high);
             err |= clSetKernelArg(partition_kernel, 3, sizeof(cl_mem), &pivot_buffer);
-            err |= clSetKernelArg(partition_kernel, 4, sizeof(unsigned long), &pivot);
+            err |= clSetKernelArg(partition_kernel, 4, sizeof(int), &pivot);
 
             size_t global_size = high - low + 1;
             err = clEnqueueNDRangeKernel(queue, partition_kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
@@ -183,7 +176,8 @@ void cl_quick_sort(unsigned long* arr, int size)
                 high = mid;
             }
         }
-        if (high - low + 1 > 1) {
+        if (high - low + 1 > 1) 
+        {
             err = clSetKernelArg(insertion_sort_kernel, 0, sizeof(cl_mem), &buffer);
             err |= clSetKernelArg(insertion_sort_kernel, 1, sizeof(int), &low);
             err |= clSetKernelArg(insertion_sort_kernel, 2, sizeof(int), &high);
@@ -192,7 +186,7 @@ void cl_quick_sort(unsigned long* arr, int size)
             clFinish(queue);
         }
     }
-    err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, size * sizeof(unsigned long), arr, 0, NULL, NULL);
+    err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, size * sizeof(int), arr, 0, NULL, NULL);
 
     clReleaseMemObject(buffer);
     clReleaseMemObject(pivot_buffer);
@@ -204,7 +198,7 @@ void cl_quick_sort(unsigned long* arr, int size)
     free((void*)kernelSource);
 }
 
-void cl_radix_sort(unsigned long* arr, int size, unsigned long max) 
+/*void cl_radix_sort(int* arr, int size, int max) 
 {
     cl_int err;
     cl_platform_id platform;
@@ -227,22 +221,22 @@ void cl_radix_sort(unsigned long* arr, int size, unsigned long max)
 
     partition_kernel = clCreateKernel(program, "partition", &err);
 
-    buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(unsigned long), arr, &err);
+    buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(int), arr, &err);
     pivot_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &err);
 
-    void quicksort_by_digit(int low, int high, unsigned long exp) 
+    void quicksort_by_digit(int low, int high, int exp) 
     {
         if (low < high) 
         {
-            unsigned long pivot;
-            size_t offset = high * sizeof(unsigned long);
-            err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, offset, sizeof(unsigned long), &pivot, 0, NULL, NULL);
-            unsigned long pivot_digit = (pivot / exp) % 10;
+            int pivot;
+            size_t offset = high * sizeof(int);
+            err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, offset, sizeof(int), &pivot, 0, NULL, NULL);
+            int pivot_digit = (pivot / exp) % 10;
             err = clSetKernelArg(partition_kernel, 0, sizeof(cl_mem), &buffer);
             err |= clSetKernelArg(partition_kernel, 1, sizeof(int), &low);
             err |= clSetKernelArg(partition_kernel, 2, sizeof(int), &high);
             err |= clSetKernelArg(partition_kernel, 3, sizeof(cl_mem), &pivot_buffer);
-            err |= clSetKernelArg(partition_kernel, 4, sizeof(unsigned long), &pivot_digit);
+            err |= clSetKernelArg(partition_kernel, 4, sizeof(int), &pivot_digit);
 
             size_t global_size = 1;
             err = clEnqueueNDRangeKernel(queue, partition_kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
@@ -256,12 +250,12 @@ void cl_radix_sort(unsigned long* arr, int size, unsigned long max)
         }
     }
 
-    for (unsigned long exp = 1; max/exp > 0; exp *= 10) 
+    for (int exp = 1; max/exp > 0; exp *= 10) 
     {
         quicksort_by_digit(0, size - 1, exp);
     }
 
-    err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, size * sizeof(unsigned long), arr, 0, NULL, NULL);
+    err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, size * sizeof(int), arr, 0, NULL, NULL);
 
     clReleaseMemObject(buffer);
     clReleaseMemObject(pivot_buffer);
@@ -270,4 +264,4 @@ void cl_radix_sort(unsigned long* arr, int size, unsigned long max)
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
     free((void*)kernelSource);
-}
+}*/

@@ -5,9 +5,9 @@
 #include <time.h>
 #include <string.h>
 
-unsigned long* generateRandomArray(int size, unsigned long min, unsigned long max) 
+int* generateRandomArray(int size, int min, int max) 
 {
-    unsigned long* arr = (unsigned long*)malloc(size * sizeof(unsigned long));
+    int* arr = (int*)malloc(size * sizeof(int));
     if (arr == NULL) 
     {
         fprintf(stderr, "Memory allocation failed\n");
@@ -24,7 +24,7 @@ unsigned long* generateRandomArray(int size, unsigned long min, unsigned long ma
     return arr;
 }
 
-void writeArrayToFile(unsigned long* arr, int size, const char* filename)
+void writeArrayToFile(int* arr, int size, const char* filename)
 {
     char* fullPath = malloc(strlen("saves/") + strlen(filename) + 1);
     if (fullPath == NULL) 
@@ -46,7 +46,7 @@ void writeArrayToFile(unsigned long* arr, int size, const char* filename)
 
     for (int i = 0; i < size; i++) 
     {
-        fprintf(file, "%lu\n", arr[i]);
+        fprintf(file, "%d\n", arr[i]);
     }
 
     fclose(file);
