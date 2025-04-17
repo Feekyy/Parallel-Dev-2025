@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GROUP 50
-#define SIZE 10000
-#define MAX 32000
+#define GROUP 2
+#define SIZE 10
+#define MAX 100
 
 int main(int argc, char *argv[])
 {

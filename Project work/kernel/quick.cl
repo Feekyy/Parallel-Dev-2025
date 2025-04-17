@@ -1,6 +1,7 @@
 __kernel void partition(__global int* arr, int low, int high, __global int* pivot_index, int pivot_digit, int exp, int is_radix) 
 {
-    int i = low - 1;pivot_index[0] = i + 1;
+    int i = low - 1;
+    pivot_index[0] = i + 1;
 
     for (int j = low; j <= high - 1; j++) 
     {
@@ -24,20 +25,4 @@ __kernel void partition(__global int* arr, int low, int high, __global int* pivo
     arr[high] = temp;
 
     pivot_index[0] = i + 1;
-}
-
-__kernel void insertion_sort(__global int* arr, int low, int high) 
-{
-    for (int i = low + 1; i <= high; i++) 
-    {
-        int key = arr[i];
-        int j = i - 1;
-
-        while (j >= low && arr[j] < key) 
-        { 
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
 }

@@ -15,4 +15,6 @@ void cl_radix_sort(int* arr, int size, int max);
 
 void quicksort_by_digit(cl_context context, cl_command_queue queue, cl_program program, cl_mem buffer, cl_mem pivot_buffer, cl_kernel partition_kernel, int low, int high, int exp);
 
+void quicksort_recursive(cl_context context, cl_command_queue queue, cl_program program, cl_mem buffer, cl_mem pivot_buffer, cl_kernel partition_kernel, int low, int high, int exp)
+
 #endif
