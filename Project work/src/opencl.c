@@ -1,9 +1,9 @@
-#include "opencl.h"
-#include "sorting.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <CL/cl.h>
+
+#include "opencl.h"
+#include "sorting.h"
 
 #define INSERTION_SORT_THRESHOLD 32
 
@@ -107,7 +107,7 @@ void cl_quick_sort(int* arr, int size)
     cl_context context;
     cl_command_queue queue;
     cl_program program;
-    cl_kernel partition_kernel, insertion_sort_kernel;
+    cl_kernel partition_kernel;
 
     err = clGetPlatformIDs(1, &platform, NULL);
     err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
@@ -124,14 +124,13 @@ void cl_quick_sort(int* arr, int size)
     cl_mem buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(int), arr, &err);
     cl_mem pivot_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &err);
 
-    quicksort_recursive(context, queue, program, buffer, pivot_buffer, partition_kernel, 0, size - 1, 0);
+    quicksort_recursive(context, queue, program, buffer, pivot_buffer, partition_kernel, 0, size - 1);
 
     clEnqueueReadBuffer(queue, buffer, CL_TRUE, 0, size * sizeof(int), arr, 0, NULL, NULL);
 
     clReleaseMemObject(buffer);
     clReleaseMemObject(pivot_buffer);
     clReleaseKernel(partition_kernel);
-    clReleaseKernel(insertion_sort_kernel);
     clReleaseProgram(program);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
@@ -165,8 +164,21 @@ void cl_radix_sort(int* arr, int size, int max)
     buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size * sizeof(int), arr, &err);
     pivot_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int), NULL, &err);
 
-    for (int exp = 1; max / exp > 0; exp *= 10)
+    int max_digits = 0;
+    int temp = max;
+    while (temp > 0) 
     {
+        max_digits++;
+        temp /= 10;
+    }
+
+    for (int digit = 0; digit < max_digits; digit++)
+    {
+        int exp = 1;
+        for (int i = 0; i < digit; i++) 
+        {
+            exp *= 10;
+        }
         quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, 0, size - 1, exp);
     }
 
@@ -181,13 +193,20 @@ void cl_radix_sort(int* arr, int size, int max)
     free((void*)kernelSource);
 }
 
-void quicksort_recursive(cl_context context, cl_command_queue queue, cl_program program, cl_mem buffer, cl_mem pivot_buffer, cl_kernel partition_kernel, int low, int high, int exp)
+void quicksort_recursive(cl_context context, cl_command_queue queue, cl_program program, cl_mem buffer, cl_mem pivot_buffer, cl_kernel partition_kernel, int low, int high)
 {
     if (low < high)
     {
         int pivot;
-        clEnqueueReadBuffer(queue, buffer, CL_TRUE, high * sizeof(int), sizeof(int), &pivot, 0, NULL, NULL);
-        int pivot_digit = (pivot / exp) % 10;
+        cl_int err = clEnqueueReadBuffer(queue, buffer, CL_TRUE, high * sizeof(int), sizeof(int), &pivot, 0, NULL, NULL);
+        if (err != CL_SUCCESS)
+        {
+            printf("Error reading buffer: %d\n", err);
+            return;
+        }
+        
+        int exp = 1;
+        int pivot_digit = pivot;
         int is_radix = 0;
         
         clSetKernelArg(partition_kernel, 0, sizeof(cl_mem), &buffer);
@@ -198,15 +217,17 @@ void quicksort_recursive(cl_context context, cl_command_queue queue, cl_program 
         clSetKernelArg(partition_kernel, 5, sizeof(int), &exp);
         clSetKernelArg(partition_kernel, 6, sizeof(int), &is_radix);
         
-        size_t global_size = 1;
+        size_t global_size = high - low + 1;
         clEnqueueNDRangeKernel(queue, partition_kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
         clFinish(queue);
         
         int pivot_index;
         clEnqueueReadBuffer(queue, pivot_buffer, CL_TRUE, 0, sizeof(int), &pivot_index, 0, NULL, NULL);
         
-        quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, pivot_index + 1, high, exp);
-        quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, low, pivot_index - 1, exp); 
+        if (pivot_index > low)
+            quicksort_recursive(context, queue, program, buffer, pivot_buffer, partition_kernel, low, pivot_index - 1);
+        if (pivot_index < high)
+            quicksort_recursive(context, queue, program, buffer, pivot_buffer, partition_kernel, pivot_index + 1, high);
     }
 }
 
@@ -227,14 +248,14 @@ void quicksort_by_digit(cl_context context, cl_command_queue queue, cl_program p
         clSetKernelArg(partition_kernel, 5, sizeof(int), &exp);
         clSetKernelArg(partition_kernel, 6, sizeof(int), &is_radix);
         
-        size_t global_size = 1;
+        size_t global_size = high - low + 1;
         clEnqueueNDRangeKernel(queue, partition_kernel, 1, NULL, &global_size, NULL, 0, NULL, NULL);
         clFinish(queue);
         
         int pivot_index;
         clEnqueueReadBuffer(queue, pivot_buffer, CL_TRUE, 0, sizeof(int), &pivot_index, 0, NULL, NULL);
         
+        quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, low, pivot_index - 1, exp);
         quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, pivot_index + 1, high, exp);
-        quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, low, pivot_index - 1, exp); 
     }
 }

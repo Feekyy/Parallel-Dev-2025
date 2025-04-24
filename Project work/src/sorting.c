@@ -53,37 +53,16 @@ void max_sort(int* arr, int size)
     }
 }
 
-void quick_sort_by_digit(int* arr, int low, int high, int exp) 
-{
-    if (low < high) 
-    {
-        int homogeneous = 1;
-        int d0 = (arr[low] / exp) % 10;
-        for (int k = low + 1; k <= high; k++) 
-        {
-            if ((arr[k] / exp) % 10 != d0) 
-            {
-                homogeneous = 0;
-                break;
-            }
-        }
-        if (homogeneous)
-            return;
-
-        int pi = partition_by_digit(arr, low, high, exp);
-        quick_sort_by_digit(arr, low, pi - 1, exp);
-        quick_sort_by_digit(arr, pi + 1, high, exp);
-    }
-}
-
 int partition_by_digit(int* arr, int low, int high, int exp) 
 {
-    int pivot_digit = (arr[high] / exp) % 10;
+    int pivot = arr[high];
+    int pivot_digit = (pivot / exp) % 10;
     int i = low - 1;
+    
     for (int j = low; j <= high - 1; j++) 
     {
         int current_digit = (arr[j] / exp) % 10;
-        if (current_digit < pivot_digit) 
+        if (current_digit > pivot_digit || (current_digit == pivot_digit && arr[j] > pivot))
         {
             i++;
             swap(&arr[i], &arr[j]);
@@ -93,7 +72,17 @@ int partition_by_digit(int* arr, int low, int high, int exp)
     return (i + 1);
 }
 
-void radix_sort_quick(int* arr, int size, int max) 
+void quick_sort_by_digit(int* arr, int low, int high, int exp) 
+{
+    if (low < high) 
+    {
+        int pi = partition_by_digit(arr, low, high, exp);
+        quick_sort_by_digit(arr, low, pi - 1, exp);
+        quick_sort_by_digit(arr, pi + 1, high, exp);
+    }
+}
+
+void radix_quicksort(int* arr, int size, int max) 
 {
     for (int exp = 1; max / exp > 0; exp *= 10) 
     {

@@ -9,7 +9,7 @@ void quick_sort(int* arr, int low, int high);
 
 int partition(int* arr, int low, int high);
 
-void radix_sort_quick(int* arr, int size, int max);
+void radix_quicksort(int* arr, int size, int max);
 
 void quick_sort_by_digit(int* arr, int low, int high, int exp);
 
