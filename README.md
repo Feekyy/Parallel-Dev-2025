@@ -8,11 +8,10 @@ Comment: The final result depends heavily on the system it is running on. Especi
 
 Conclusions based on the RW statistics file:
 
-Maximum sort: the sort is independent or only minimally affected by the increase in the maximum of random values, and the only thing that increases the running time is how many elements it contains. Based on the results, due to the cost of threading, it would only be worthwhile for a very large number of elements (about 10^8).
+Max sort: The sorting time is independent of, or only minimally affected by, the increase in the maximum value of random elements. The running time depends primarily on the number of elements. According to the results, due to the overhead of threading, parallelization is only worthwhile for extremely large datasets (around 10^8 elements).
 
-Quick sort: this is the only algorithm that reacts negatively to the increase in our maximum size, as it strongly affects the partition algorithm. Parallelization is not really worth it for this algorithm, as the thread handling and the VRAM fullfilling due to recursion slow down the operation a lot.
+Quick sort: This is the only algorithm that is negatively affected by an increase in the maximum value, as it significantly impacts the partitioning step. Parallelization is generally not worthwhile here, because thread management and memory operations (especially VRAM pressure caused by recursion) introduce substantial overhead.
 
-Radix sort: In this algorithm, it is not the maximum value that matters, but how many digits it consists of. Parallelization was not invented for this algorithm.
+Radix sort: For this algorithm, the maximum value is irrelevant; instead, performance is influenced by the number of digits per value. Parallelization does not benefit this algorithm significantly, as it was not designed with parallel execution in mind.
 
-Summary: these algorithms are explicitly sequential measurements, so when you run them in parallel, the thread management and other costs (memory management, memory shortage, etc.) will be much slower than sequential. In short: it's not worth it.
-These results and conclusions are based on the fact that the arrays contained only ints, interesting results can be obtained if you need to sort a structure according to given criteria.
+Summary: These algorithms were tested in inherently sequential implementations, and when executed in parallel, the overhead from thread management and memory handling (e.g. fragmentation, memory limits) often outweighs the benefits. In short: it’s not worth parallelizing them in these cases. These results and conclusions are based on arrays containing only integers. More interesting results might emerge when sorting complex structures based on specific criteria.
