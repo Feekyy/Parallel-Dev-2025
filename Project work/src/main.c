@@ -1,6 +1,6 @@
 #include "generate.h"
 #include "sorting.h"
-#include "opencl.h"
+#include "parallel.h"
 
 #include <CL/cl.h>
 #include <time.h>

@@ -1,3 +1,4 @@
+// Function to perform partition operation in quick sort and in radix sort too. (is_radix: 0 for quick sort, 1 for radix sort)
 __kernel void partition(__global int* arr, int low, int high, __global int* pivot_index, int pivot_digit, int exp, int is_radix) 
 {
     int i = low - 1;
