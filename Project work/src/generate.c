@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 
 int* generateRandomArray(int size, int min, int max) 
 {
@@ -51,4 +54,41 @@ void writeArrayToFile(int* arr, int size, const char* filename)
 
     fclose(file);
     free(fullPath);
+}
+
+void createSavesFolder() 
+{
+    #ifdef _WIN32
+    if (mkdir("saves") == -1) 
+    {
+    #else
+    if (mkdir("saves", 0777) == -1) 
+    {
+    #endif
+        if (errno != EEXIST) 
+        {
+            fprintf(stderr, "Error creating 'saves' directory: %s\n", strerror(errno));
+        }
+    } 
+    else 
+    {
+        printf("'saves' directory created successfully.\n");
+    }
+}
+
+void deleteSavesFolder() 
+{
+    #ifdef _WIN32
+    if (system("rmdir /s /q saves") != 0) 
+    {
+    #else
+    if (system("rm -rf saves") != 0) 
+    {
+    #endif
+        fprintf(stderr, "Error deleting 'saves' directory.\n");
+    } 
+    else 
+    {
+        printf("'saves' directory deleted successfully.\n");
+    }
 }

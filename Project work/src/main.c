@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
     int size[] = {10000, 10000, 1000000, 1000000, 100000000, 100000000};
     int max[] = {15000, 32000, 15000, 32000, 15000, 32000};
 
+    deleteSavesFolder();
+    createSavesFolder();
+
     for (int i = 0; i < 5; i++)
     {
         printf("NEW CYCLE\nSize: %d, Max: %d\n\n", size[i], max[i]);
