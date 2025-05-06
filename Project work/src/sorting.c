@@ -11,6 +11,20 @@ void swap(int* a, int* b)
     *b = temp;
 }
 
+void max_sort(int* arr, int size)
+{
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = i + 1; j < size; j++)
+        {
+            if (arr[j] > arr[i])
+            {
+                swap(&arr[j], &arr[i]);
+            }
+        }
+    }
+}
+
 void quick_sort(int* arr, int low, int high)
 {
     if (low < high)
@@ -39,17 +53,11 @@ int partition(int* arr, int low, int high)
     return (i + 1);
 }
 
-void max_sort(int* arr, int size)
+void radix_quicksort(int* arr, int size, int max) 
 {
-    for (int i = 0; i < size - 1; i++)
+    for (int exp = 1; max / exp > 0; exp *= 10) 
     {
-        for (int j = i + 1; j < size; j++)
-        {
-            if (arr[j] > arr[i])
-            {
-                swap(&arr[j], &arr[i]);
-            }
-        }
+        quick_sort_by_digit(arr, 0, size - 1, exp);
     }
 }
 
@@ -82,10 +90,17 @@ void quick_sort_by_digit(int* arr, int low, int high, int exp)
     }
 }
 
-void radix_quicksort(int* arr, int size, int max) 
+void max_sort_wrapper(int* arr, int size, int unused)
 {
-    for (int exp = 1; max / exp > 0; exp *= 10) 
-    {
-        quick_sort_by_digit(arr, 0, size - 1, exp);
-    }
+    max_sort(arr, size);
+}
+
+void quick_sort_wrapper(int* arr, int size, int high)
+{
+    quick_sort(arr, 0, high);
+}
+
+void radix_quicksort_wrapper(int* arr, int size, int max)
+{
+    radix_quicksort(arr, size, max);
 }

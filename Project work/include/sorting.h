@@ -20,6 +20,15 @@ void radix_quicksort(int* arr, int size, int max);
 void quick_sort_by_digit(int* arr, int low, int high, int exp);
 
 // Function to perform partition operation in quick sort by digit in radix sort
-int partition_by_digit(int* arr, int low, int high, int exp); 
+int partition_by_digit(int* arr, int low, int high, int exp);
+
+// Wrapper function
+void max_sort_wrapper(int* arr, int size, int unused);
+
+// Wrapper function
+void quick_sort_wrapper(int* arr, int size, int high);
+
+// Wrapper function
+void radix_quicksort_wrapper(int* arr, int size, int max);
 
 #endif // SORTING_H

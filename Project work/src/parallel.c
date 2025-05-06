@@ -5,6 +5,8 @@
 #include "parallel.h"
 #include "sorting.h"
 
+#define GROUP 2
+
 char* readKernelSource(const char* filename) 
 {
     FILE* file = fopen(filename, "rb");
@@ -256,4 +258,19 @@ void quicksort_by_digit(cl_context context, cl_command_queue queue, cl_program p
         quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, low, pivot_index - 1, exp);
         quicksort_by_digit(context, queue, program, buffer, pivot_buffer, partition_kernel, pivot_index + 1, high, exp);
     }
+}
+
+void cl_max_sort_wrapper(int* arr, int size, int max)
+{
+    cl_max_sort(arr, size, GROUP);
+}
+
+void cl_quick_sort_wrapper(int* arr, int size, int max)
+{
+    cl_quick_sort(arr, size);
+}
+
+void cl_radix_sort_wrapper(int* arr, int size, int max)
+{
+    cl_radix_sort(arr, size, max);
 }
