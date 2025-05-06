@@ -20,40 +20,34 @@ int main(int argc, char *argv[])
     deleteSavesFolder();
     createSavesFolder();
 
-    printf("Starting Max Sort Sequential...\n");
     data.algorithm = max_sort_wrapper;
-    sort_time = runAlgorithm(&data);
     data.save_filename = "max_sort_seq.txt";
+    sort_time = runAlgorithm(&data);
     printf("Max Sort Seq Time: %f seconds\n", sort_time);
 
-    printf("Starting Max Sort Parallel...\n");
     data.algorithm = cl_max_sort_wrapper;
     data.save_filename = "max_sort_par.txt";
     sort_time = runAlgorithm(&data);
     printf("Max Sort Par Time: %f seconds\n", sort_time);
 
-    printf("Starting Quick Sort Sequential...\n");
     data.algorithm = quick_sort_wrapper;
-    sort_time = runAlgorithm(&data);
     data.save_filename = "quick_sort_seq.txt";
+    sort_time = runAlgorithm(&data);
     printf("Quick Sort Seq Time: %f seconds\n", sort_time);
 
-    printf("Starting Quick Sort Parallel...\n");
     data.algorithm = cl_quick_sort_wrapper;
-    sort_time = runAlgorithm(&data);
     data.save_filename = "quick_sort_par.txt";
+    sort_time = runAlgorithm(&data);
     printf("Quick Sort Par Time: %f seconds\n", sort_time);
 
-    printf("Starting Radix Sort Sequential...\n");
     data.algorithm = radix_quicksort_wrapper;
-    sort_time = runAlgorithm(&data);
     data.save_filename = "radix_sort_seq.txt";
+    sort_time = runAlgorithm(&data);
     printf("Radix sort Seq Time: %f seconds\n", sort_time);
 
-    printf("Starting Radix Sort Parallel...\n");
     data.algorithm = cl_radix_sort_wrapper;
-    sort_time = runAlgorithm(&data);
     data.save_filename = "radix_sort_par.txt";
+    sort_time = runAlgorithm(&data);
     printf("Radix sort Par Time: %f seconds\n", sort_time);
 
     printf("Program completed successfully.\n");

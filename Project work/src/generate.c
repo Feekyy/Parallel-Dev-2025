@@ -35,21 +35,13 @@ int* generateRandomArray(int size, int min, int max)
 
 void writeArrayToFile(int* arr, int size, const char* filename)
 {
-    char* fullPath = malloc(strlen("saves/") + strlen(filename) + 1);
-    if (fullPath == NULL) 
-    {
-        fprintf(stderr, "Memory allocation failed for filename\n");
-        return;
-    }
-
-    strcpy(fullPath, "saves/");
-    strcat(fullPath, filename);
+    char fullPath[512];
+    snprintf(fullPath, sizeof(fullPath), "saves/%s", filename);
 
     FILE* file = fopen(fullPath, "w");
     if (file == NULL) 
     {
         fprintf(stderr, "Failed to open file: %s\n", fullPath);
-        free(fullPath);
         return;
     }
 
@@ -59,7 +51,6 @@ void writeArrayToFile(int* arr, int size, const char* filename)
     }
 
     fclose(file);
-    free(fullPath);
 }
 
 void createSavesFolder() 
@@ -99,12 +90,6 @@ void deleteSavesFolder()
 
 double runAlgorithm(test_data* data)
 {
-    if (data == NULL) {
-        fprintf(stderr, "Error: data is NULL in runAlgorithm\n");
-        return -1;
-    }
-
-    printf("Generating random array...\n");
     int* arr = generateRandomArray(data->size, data->min, data->max);
     if (arr == NULL) 
     {
@@ -114,24 +99,15 @@ double runAlgorithm(test_data* data)
     
     char filename[256];
     snprintf(filename, sizeof(filename), "DEFF_%s", data->save_filename);
-    printf("Writing initial array to file: %s\n", filename);
     writeArrayToFile(arr, data->size, filename);
 
-    printf("Starting algorithm...\n");
     clock_t start = clock();
-    
-    if (data->algorithm == NULL) {
-        fprintf(stderr, "Error: algorithm function is NULL\n");
-        free(arr);
-        return -1;
-    }
     
     data->algorithm(arr, data->size, data->max);
 
     clock_t end = clock();
     double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-    printf("Algorithm completed. Writing sorted array to file...\n");
     snprintf(filename, sizeof(filename), "SORT_%s", data->save_filename);
     writeArrayToFile(arr, data->size, filename);
 
