@@ -91,15 +91,33 @@ void quick_sort_by_digit(int* arr, int low, int high, int exp)
 
 void max_sort_wrapper(int* arr, int size, int unused)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+
     max_sort(arr, size);
 }
 
 void quick_sort_wrapper(int* arr, int size, int unused)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+
     quick_sort(arr, 0, size - 1);
 }
 
 void radix_quicksort_wrapper(int* arr, int size, int max)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+    
     radix_quicksort(arr, size, max);
 }

@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/d/own/github/Parallel-Dev-2025/Unit test/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

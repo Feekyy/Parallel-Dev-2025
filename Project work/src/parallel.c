@@ -262,15 +262,33 @@ void quicksort_by_digit(cl_context context, cl_command_queue queue, cl_program p
 
 void cl_max_sort_wrapper(int* arr, int size, int max)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+
     cl_max_sort(arr, size, GROUP);
 }
 
 void cl_quick_sort_wrapper(int* arr, int size, int max)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+
     cl_quick_sort(arr, size);
 }
 
 void cl_radix_sort_wrapper(int* arr, int size, int max)
 {
+    if (arr == NULL)
+    {
+        printf("Error: Array is NULL.\n");
+        return;
+    }
+    
     cl_radix_sort(arr, size, max);
 }
